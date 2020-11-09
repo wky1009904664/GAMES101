@@ -18,7 +18,7 @@ Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
     view = translate * view;
 
     return view;
-}
+}  
 
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
