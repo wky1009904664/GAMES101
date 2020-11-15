@@ -27,6 +27,15 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
+    Eigen::Matrix4f translate;
+    float alpha = rotation_angle / 180 * MY_PI;
+    translate << 
+        cos(alpha), -sin(alpha), 0, 0,
+        sin(alpha), cos(alpha), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+
+    model = translate * model;
 
     return model;
 }
@@ -41,6 +50,29 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+
+    Eigen::Matrix4f ortho, translate,  p2o;
+    p2o <<
+        zNear, 0, 0, 0,
+        0, zNear, 0, 0,
+        0, 0, zNear + zFar, -zNear * zFar,
+        0, 0, 1, 0;
+    translate <<
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, -(zNear + zFar) / 2,
+        0, 0, 0, 1;
+    float r, l, t, b;
+    t = zNear * tan(eye_fov / 2);
+    b = -t;
+    r = t * aspect_ratio;
+    l = -r;
+    ortho <<
+        2 / (r - l), 0, 0, 0,
+        0, 2 / (t - b), 0, 0,
+        0, 0, 2 / (zNear - zFar), 0,
+        0, 0, 0, 1;
+    projection = ortho * translate * p2o;
 
     return projection;
 }
@@ -75,6 +107,8 @@ int main(int argc, const char** argv)
     int key = 0;
     int frame_count = 0;
 
+
+
     if (command_line) {
         r.clear(rst::Buffers::Color | rst::Buffers::Depth);
 
@@ -86,7 +120,8 @@ int main(int argc, const char** argv)
         cv::Mat image(700, 700, CV_32FC3, r.frame_buffer().data());
         image.convertTo(image, CV_8UC3, 1.0f);
 
-        cv::imwrite(filename, image);
+        bool writeres = cv::imwrite(filename, image);
+        std::cout << writeres << std::endl;
 
         return 0;
     }
